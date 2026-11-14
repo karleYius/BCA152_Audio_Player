@@ -15,7 +15,7 @@ namespace cfg
     constexpr gpio_num_t I2S_DIN = GPIO_NUM_6;
 
     // Buttons (each wired between the pin and GND)
-    constexpr gpio_num_t BTN_LEFT = GPIO_NUM_15;
-    constexpr gpio_num_t BTN_MID = GPIO_NUM_16;
-    constexpr gpio_num_t BTN_RIGHT = GPIO_NUM_17;
+    constexpr gpio_num_t BTN_LEFT = GPIO_NUM_1;
+    constexpr gpio_num_t BTN_MID = GPIO_NUM_2;
+    constexpr gpio_num_t BTN_RIGHT = GPIO_NUM_42;
 }

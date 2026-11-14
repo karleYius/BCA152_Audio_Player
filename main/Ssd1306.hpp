@@ -80,6 +80,13 @@ namespace app
             bus_cfg.flags.enable_internal_pullup = true;
             ESP_ERROR_CHECK(i2c_new_master_bus(&bus_cfg, &m_bus));
 
+                    const uint8_t addrs[] = {0x3C, 0x3D};
+                    for (uint8_t a : addrs)
+                    {
+                        esp_err_t r = i2c_master_probe(m_bus, a, 100);
+                        ESP_LOGI("oled", "probe 0x%02X: %s", a, esp_err_to_name(r));
+                    }
+
             i2c_device_config_t dev_cfg = {};
             dev_cfg.dev_addr_length = I2C_ADDR_BIT_LEN_7;
             dev_cfg.device_address = addr;

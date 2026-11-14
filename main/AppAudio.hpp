@@ -60,16 +60,40 @@ namespace app
             return (err != ESP_OK) ? err : en;
         }
 
-        static esp_err_t i2sWrite(void *buf, size_t len, size_t *written, uint32_t timeout_ms)
+        static esp_err_t i2sWrite(const void *buf, size_t len, size_t *written, uint32_t timeout_ms)
         {
-            int16_t *samples = reinterpret_cast<int16_t *>(buf);
-            size_t n = len / 2;
+            const int16_t *in = reinterpret_cast<const int16_t *>(buf);
             int32_t gain = s_muted ? 0 : (int32_t)s_gain;
-            for (size_t i = 0; i < n; i++)
+            int16_t tmp[256];
+            size_t total = len / 2;
+            size_t idx = 0;
+            size_t done_bytes = 0;
+            esp_err_t err = ESP_OK;
+            while (idx < total)
             {
-                samples[i] = (int16_t)(((int32_t)samples[i] * gain) / 10000);
+                size_t n = total - idx;
+                if (n > 256)
+                {
+                    n = 256;
+                }
+                for (size_t i = 0; i < n; i++)
+                {
+                    tmp[i] = (int16_t)(((int32_t)in[idx + i] * gain) / 10000);
+                }
+                size_t w = 0;
+                err = i2s_channel_write(s_tx, tmp, n * 2, &w, timeout_ms);
+                done_bytes += w;
+                if (err != ESP_OK || w < n * 2)
+                {
+                    break;
+                }
+                idx += n;
             }
-            return i2s_channel_write(s_tx, buf, len, written, timeout_ms);
+            if (written != nullptr)
+            {
+                *written = done_bytes;
+            }
+            return err;
         }
 
         void applyVolume() { s_gain = (uint32_t)m_vol * (uint32_t)m_vol; }
@@ -182,4 +206,4 @@ namespace
                                    : app::eAudioEvent::STOPPED;
         xQueueSend(app_audio.getEventQueue(), (void *)(&evt), 0);
     }
-}
+} 
